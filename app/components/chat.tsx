@@ -1085,6 +1085,17 @@ function _Chat() {
               />
             </div>
           )}
+
+          <div className="window-action-button">
+            <IconButton
+              text="4.0"
+              bordered
+              title={Locale.Chat.Actions.Export}
+              onClick={() => {
+                config.update((config) => (config.modelConfig.model = "gpt-4"));
+              }}
+            />
+          </div>
           <div className="window-action-button">
             <IconButton
               icon={<ExportIcon />}
