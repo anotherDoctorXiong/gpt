@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { showToast } from "./ui-lib";
-import { useAppConfig } from "../store";
+import { useAccessStore, useAppConfig } from "../store";
 import { notEmptyString } from "@/app/utils/format";
+import { getHeaders } from "@/app/client/api";
 
 export function Account() {
   const [UserInfo, setUserInfo] = useState({
@@ -21,10 +22,14 @@ export function Account() {
   const [OrderInfo, setOrderInfo] = useState({
     id: "",
     amount: 0,
-    QRCodeUrl: "",
+    url: "",
   });
-  const [countdownImage, setCountdownImage] = useState("");
+  const accessStore = useAccessStore();
 
+  const [showImage, setShowImage] = useState(false);
+  const [urlCountDown, setUrlCountDown] = useState(60);
+
+  // 验证码倒计时
   useEffect(() => {
     let timer: NodeJS.Timeout;
 
@@ -38,12 +43,26 @@ export function Account() {
     return () => clearTimeout(timer);
   }, [isCodeSent, countdown]);
 
+  // 充值二维码倒计时
+  useEffect(() => {
+    let timer: NodeJS.Timeout;
+
+    if (showImage && urlCountDown > 0) {
+      timer = setTimeout(() => setUrlCountDown(urlCountDown - 1), 1000);
+    } else {
+      setShowImage(false);
+      setCountdown(60);
+    }
+    return () => clearTimeout(timer);
+  }, [showImage, urlCountDown]);
+
   useEffect(() => {
     if (notEmptyString(UserInfo.token)) {
-      config.update((config) => (config.authorization = UserInfo.token));
+      config.update((config) => (config.token = UserInfo.token));
       config.update(() => {
         config.needLogin = false;
       });
+      accessStore.update((access) => (access.token = UserInfo.token));
     }
     if (notEmptyString(UserInfo.refreshToken)) {
       config.update((config) => (config.refreshToken = UserInfo.refreshToken));
@@ -75,14 +94,12 @@ export function Account() {
     };
     // 组件加载时调用接口
     fetchData();
-  }, []); // 空数组作为依赖，确保这段代码只在组件加载时执行一次
+  }, [loginStatus]); // 空数组作为依赖，确保这段代码只在组件加载时执行一次
 
   const sendLoginCode = async () => {
     const res = await fetch("http://127.0.0.1:8080/v1/gpt/user/loginCode", {
       body: JSON.stringify(UserInfo),
-      headers: {
-        "Content-Type": "application/json",
-      },
+      headers: getHeaders(),
       method: "POST",
     });
 
@@ -99,9 +116,7 @@ export function Account() {
   const handleLogin = async () => {
     const res = await fetch("http://127.0.0.1:8080/v1/gpt/user/login", {
       body: JSON.stringify(UserInfo),
-      headers: {
-        "Content-Type": "application/json",
-      },
+      headers: getHeaders(),
       method: "POST",
     });
 
@@ -119,9 +134,7 @@ export function Account() {
   const refreshToken = async () => {
     const res = await fetch("http://127.0.0.1:8080/v1/gpt/user/refreshToken", {
       body: JSON.stringify(UserInfo),
-      headers: {
-        "Content-Type": "application/json",
-      },
+      headers: getHeaders(),
       method: "POST",
     });
 
@@ -138,9 +151,7 @@ export function Account() {
   const createOrder = async () => {
     const res = await fetch("http://127.0.0.1:8080/v1/gpt/order/create", {
       body: JSON.stringify(OrderInfo),
-      headers: {
-        "Content-Type": "application/json",
-      },
+      headers: getHeaders(),
       method: "POST",
     });
 
@@ -152,16 +163,7 @@ export function Account() {
     }
     // 设置订单信息
     setOrderInfo(result.data);
-    const countdownImage = OrderInfo.QRCodeUrl;
-
-    let index = 0;
-
-    const interval = setInterval(() => {
-      setCountdownImage(countdownImage);
-      index++;
-      clearInterval(interval);
-      setCountdownImage("");
-    }, 1000); // 更改图片的间隔时间（单位：毫秒）
+    setShowImage(true);
   };
 
   return (
@@ -219,7 +221,7 @@ export function Account() {
                 });
               }}
             >
-              <option value="0" disabled selected>
+              <option value="0" disabled>
                 请选择要充值的金额
               </option>
               {dropdownOptions.map((value, index) => (
@@ -231,8 +233,10 @@ export function Account() {
           </div>
 
           <div>
-            <button onClick={startCountdown}>充值</button>
-            {countdownImage && <img src={countdownImage} alt="Countdown" />}
+            <button onClick={createOrder}>充值</button>
+
+            {showImage && <img src={OrderInfo.url} alt="Countdown" />}
+            {urlCountDown}
           </div>
           <button
             onClick={() => {
