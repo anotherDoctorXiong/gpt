@@ -1,8 +1,17 @@
 import React, { useState, useEffect } from "react";
-import { showToast } from "./ui-lib";
+import { showConfirm, showToast } from "./ui-lib";
 import { useAccessStore, useAppConfig } from "../store";
 import { notEmptyString } from "@/app/utils/format";
 import { getHeaders } from "@/app/client/api";
+
+import style from "./account.module.scss";
+import chatStyle from "./new-chat.module.scss";
+import { useLocation, useNavigate } from "react-router-dom";
+import { IconButton } from "@/app/components/button";
+import LeftIcon from "@/app/icons/left.svg";
+import Locale from "@/app/locales";
+import { Path } from "@/app/constant";
+import ui from "./ui-lib.module.scss";
 
 export function Account() {
   const [UserInfo, setUserInfo] = useState({
@@ -28,6 +37,7 @@ export function Account() {
 
   const [showImage, setShowImage] = useState(false);
   const [urlCountDown, setUrlCountDown] = useState(60);
+  const navigate = useNavigate();
 
   // 验证码倒计时
   useEffect(() => {
@@ -167,51 +177,64 @@ export function Account() {
   };
 
   return (
-    <div>
+    <div className={chatStyle["new-chat"]}>
+      <div className={chatStyle["mask-header"]}>
+        <IconButton
+          icon={<LeftIcon />}
+          text={Locale.NewChat.Return}
+          onClick={() => navigate(Path.Home)}
+        ></IconButton>
+      </div>
+
+      {showImage && (
+        <img src={OrderInfo.url} alt="Countdown" className={style["image"]} />
+      )}
+
       {!loginStatus ? (
-        <div>
-          <h2>验证码登录</h2>
-          <label>
-            手机号码:
+        <div className={style["account"]}>
+          <div className={style["input"]}>
             <input
               type="text"
               value={UserInfo.phone}
+              placeholder="请输入手机号码"
+              className={ui["full"]}
               onChange={(e) => {
                 setUserInfo({ ...UserInfo, phone: e.target.value });
               }}
             />
-          </label>
-          <br />
-          {!isCodeSent ? (
-            <button onClick={sendLoginCode}>发送验证码</button>
-          ) : (
-            <span>验证码已发送 ({countdown}s)</span>
-          )}
-          <br />
-          {isCodeSent && (
-            <label>
-              验证码:
-              <input
-                type="text"
-                value={UserInfo.captcha}
-                onChange={(e) => {
-                  setUserInfo({ ...UserInfo, captcha: e.target.value });
-                }}
-              />
-            </label>
-          )}
-          <br />
-          {isCodeSent && <button onClick={handleLogin}>登录</button>}
+          </div>
+          <div className={style["input"]}>
+            <input
+              type="text"
+              value={UserInfo.captcha}
+              onChange={(e) => {
+                setUserInfo({ ...UserInfo, captcha: e.target.value });
+              }}
+              className={ui["full"]}
+              placeholder="请输入验证码"
+            />
+            {!isCodeSent ? (
+              <button onClick={sendLoginCode}>发送验证码</button>
+            ) : (
+              <button>验证码已发送 ({countdown}s)</button>
+            )}
+          </div>
+          <div className={style["input"]}>
+            <button onClick={handleLogin} className={ui["full"]}>
+              登录
+            </button>
+          </div>
         </div>
       ) : (
-        <div>
-          <div>
+        <div className={style["account"]}>
+          <div className={style["input"]}>
             <strong>手机号:</strong> {UserInfo.phone}
           </div>
-          <div>
+          <div className={style["input"]}>
             <strong>余额:</strong> ${UserInfo.balance}
           </div>
-          <div>
+          <div className={style["input"]}>
+            <strong>选择充值档位:</strong>
             <select
               value={OrderInfo.amount}
               onChange={(event) => {
@@ -221,9 +244,6 @@ export function Account() {
                 });
               }}
             >
-              <option value="0" disabled>
-                请选择要充值的金额
-              </option>
               {dropdownOptions.map((value, index) => (
                 <option key={index} value={value}>
                   {value / 100 + "元"}
@@ -232,20 +252,21 @@ export function Account() {
             </select>
           </div>
 
-          <div>
+          <div className={style["input"]}>
             <button onClick={createOrder}>充值</button>
-
-            {showImage && <img src={OrderInfo.url} alt="Countdown" />}
             {urlCountDown}
           </div>
-          <button
-            onClick={() => {
-              setLoginStatus(false);
-            }}
-          >
-            重新登录
-          </button>
-          <button onClick={refreshToken}>刷新</button>
+
+          <div className={style["input"]}>
+            <button
+              onClick={() => {
+                setLoginStatus(false);
+              }}
+            >
+              重新登录
+            </button>
+            <button onClick={refreshToken}>刷新</button>
+          </div>
         </div>
       )}
     </div>

@@ -1,0 +1,42 @@
+.return-header{
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    padding: 10px;
+    box-sizing: border-box;
+    animation: slide-in-from-top ease 0.3s;
+ }
+
+.account{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  width: 100%;
+  flex-direction: column;
+  .input {
+     display: flex;
+     justify-content: space-between;
+     align-items: center;
+     min-height: 40px;
+     border-bottom: var(--border-in-light);
+     padding: 10px 20px;
+     animation: slide-in ease 0.6s;
+     width: 35%;
+  }
+  .image{
+    position: fixed;
+    transform: translate(-50%, -50%);
+    max-width: 30%; /* 设置最大宽度 */
+    max-height: 40%; /* 设置最大高度 */
+  }
+}
+
+@media (max-width: 768px) {
+  /* 输入框样式调整 */
+    .account .input{
+        width:80%
+    }
+
+
+}
