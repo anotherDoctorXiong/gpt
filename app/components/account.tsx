@@ -178,7 +178,22 @@ export function Account() {
 
   return (
     <div className={chatStyle["new-chat"]}>
-      <div className={chatStyle["mask-header"]}>
+      {showImage && (
+        <div>
+          <img
+            src={OrderInfo.url}
+            loading="lazy"
+            style={{ width: "200px", height: "250px" }}
+          />
+          <div className={style["input"]} style={{ height: "20%" }}>
+            <button onClick={() => setShowImage(false)} className={ui["full"]}>
+              取消支付
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* <div className={chatStyle["mask-header"]}>
         <IconButton
           icon={<LeftIcon />}
           text={Locale.NewChat.Return}
@@ -268,7 +283,7 @@ export function Account() {
             <button onClick={refreshToken}>刷新</button>
           </div>
         </div>
-      )}
+      )}*/}
     </div>
   );
 }
