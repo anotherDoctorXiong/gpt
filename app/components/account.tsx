@@ -12,6 +12,7 @@ import LeftIcon from "@/app/icons/left.svg";
 import Locale from "@/app/locales";
 import { Path } from "@/app/constant";
 import ui from "./ui-lib.module.scss";
+import { wait } from "next/dist/build/output/log";
 
 export function Account() {
   const [UserInfo, setUserInfo] = useState({
@@ -29,8 +30,8 @@ export function Account() {
   );
   const [dropdownOptions, setDropdownOptions] = useState([]);
   const [OrderInfo, setOrderInfo] = useState({
-    id: "",
     amount: 0,
+    realAmount: 0,
     url: "",
   });
   const accessStore = useAccessStore();
@@ -42,7 +43,6 @@ export function Account() {
   // 验证码倒计时
   useEffect(() => {
     let timer: NodeJS.Timeout;
-
     if (isCodeSent && countdown > 0) {
       timer = setTimeout(() => setCountdown(countdown - 1), 1000);
     } else {
@@ -56,12 +56,22 @@ export function Account() {
   // 充值二维码倒计时
   useEffect(() => {
     let timer: NodeJS.Timeout;
-
     if (showImage && urlCountDown > 0) {
-      timer = setTimeout(() => setUrlCountDown(urlCountDown - 1), 1000);
+      timer = setTimeout(() => {
+        setUrlCountDown(urlCountDown - 2);
+        getPayStatus().then((r) => {
+          // 支付成功关闭二维码,更新用户信息
+          if (r) {
+            getUserInfo().then((r) => {
+              setShowImage(false);
+              clearTimeout(timer);
+            });
+          }
+        });
+      }, 2000);
     } else {
       setShowImage(false);
-      setCountdown(60);
+      setCountdown(180);
     }
     return () => clearTimeout(timer);
   }, [showImage, urlCountDown]);
@@ -79,32 +89,61 @@ export function Account() {
     }
   }, [UserInfo]);
 
+  // 订单状态变化
   useEffect(() => {
-    // 调用接口获取下拉菜单数据
-    const fetchData = async () => {
-      try {
-        const response = await fetch(
-          "http://127.0.0.1:8080/v1/gpt/order/positionList",
-        );
-        if (response.ok) {
-          const result: any = await response.json();
-          if (result.code !== 200) {
-            showToast(result.message);
-            setDropdownOptions([]);
-            return;
-          }
-          // 设置下拉菜单选项
-          setDropdownOptions(result.data); // 替换 "data.options" 为实际从 API 获取的下拉菜单数据
-        } else {
-          console.error("Failed to fetch dropdown options");
-        }
-      } catch (error) {
-        console.error("Error fetching dropdown options:", error);
+    if (notEmptyString(OrderInfo.url) && notEmptyString(OrderInfo.amount)) {
+      setShowImage(true);
+    }
+    console.log("OrderInfo ", OrderInfo);
+  }, [OrderInfo.amount]);
+
+  useEffect(() => {
+    getOrderList().then((r) => {});
+  }, [loginStatus]);
+
+  // 组件挂载时执行一次
+  useEffect(() => {
+    // 通过token获取用户信息并校验token是否有效
+    getUserInfo().then((success) => {
+      if (!success) {
+        // 失败则尝试通过refreshToken重新获取token
+        refreshToken().then((r) => {});
       }
-    };
-    // 组件加载时调用接口
-    fetchData();
-  }, [loginStatus]); // 空数组作为依赖，确保这段代码只在组件加载时执行一次
+    });
+  }, []);
+
+  const getOrderList = async () => {
+    const res = await fetch("http://127.0.0.1:8080/v1/gpt/order/positionList", {
+      headers: getHeaders(),
+      method: "GET",
+    });
+
+    const result: any = await res.json();
+    if (result.code !== 200) {
+      showToast(result.message);
+      setDropdownOptions([]);
+      return;
+    }
+
+    // 设置下拉菜单数据
+    setDropdownOptions(result.data);
+    setOrderInfo({ ...OrderInfo, amount: dropdownOptions[0] });
+  };
+
+  const getUserInfo = async () => {
+    const res = await fetch("http://127.0.0.1:8080/v1/gpt/user/info", {
+      headers: getHeaders(),
+      method: "GET",
+    });
+
+    const result: any = await res.json();
+    if (result.code !== 200) {
+      return false;
+    }
+    setLoginStatus(true);
+    setUserInfo(result.data);
+    return true;
+  };
 
   const sendLoginCode = async () => {
     const res = await fetch("http://127.0.0.1:8080/v1/gpt/user/loginCode", {
@@ -152,10 +191,11 @@ export function Account() {
     const result: any = await res.json();
     if (result.code !== 200) {
       showToast(result.message);
-      return;
+      return false;
     }
     // 模拟发送成功后的操作
     setUserInfo(result.data);
+    return true;
   };
 
   const createOrder = async () => {
@@ -173,38 +213,55 @@ export function Account() {
     }
     // 设置订单信息
     setOrderInfo(result.data);
-    setShowImage(true);
+  };
+
+  const getPayStatus = async () => {
+    const res = await fetch("http://127.0.0.1:8080/v1/gpt/order/pay/status", {
+      body: JSON.stringify(OrderInfo),
+      headers: getHeaders(),
+      method: "POST",
+    });
+    // 解析返回的 JSON 数据
+    const result: any = await res.json();
+    if (result.code !== 200) {
+      showToast(result.message);
+      return false;
+    }
+    if (result.data) {
+      return true;
+    }
+  };
+
+  const cancelOrder = async () => {
+    const res = await fetch("http://127.0.0.1:8080/v1/gpt/order/pay/cancel", {
+      body: JSON.stringify(OrderInfo),
+      headers: getHeaders(),
+      method: "POST",
+    });
+
+    // 解析返回的 JSON 数据
+    const result: any = await res.json();
+    if (result.code !== 200) {
+      showToast(result.message);
+    }
+    setShowImage(false);
   };
 
   return (
     <div className={chatStyle["new-chat"]}>
-      {showImage && (
-        <div>
-          <img
-            src={OrderInfo.url}
-            loading="lazy"
-            style={{ width: "200px", height: "250px" }}
-          />
-          <div className={style["input"]} style={{ height: "20%" }}>
-            <button onClick={() => setShowImage(false)} className={ui["full"]}>
-              取消支付
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* <div className={chatStyle["mask-header"]}>
+      <div className={chatStyle["mask-header"]}>
         <IconButton
           icon={<LeftIcon />}
           text={Locale.NewChat.Return}
-          onClick={() => navigate(Path.Home)}
+          onClick={() => {
+            if (showImage) {
+              setShowImage(false);
+            } else {
+              navigate(Path.Home);
+            }
+          }}
         ></IconButton>
       </div>
-
-      {showImage && (
-        <img src={OrderInfo.url} alt="Countdown" className={style["image"]} />
-      )}
-
       {!loginStatus ? (
         <div className={style["account"]}>
           <div className={style["input"]}>
@@ -237,6 +294,19 @@ export function Account() {
           <div className={style["input"]}>
             <button onClick={handleLogin} className={ui["full"]}>
               登录
+            </button>
+          </div>
+        </div>
+      ) : showImage ? (
+        <div className={style["account"]}>
+          <img
+            src={OrderInfo.url}
+            loading="lazy"
+            style={{ width: "30%", height: "60%" }}
+          />
+          <div className={style["input"]}>
+            <button onClick={() => cancelOrder} className={ui["full"]}>
+              取消支付
             </button>
           </div>
         </div>
@@ -280,10 +350,10 @@ export function Account() {
             >
               重新登录
             </button>
-            <button onClick={refreshToken}>刷新</button>
+            <button onClick={getUserInfo}>刷新</button>
           </div>
         </div>
-      )}*/}
+      )}
     </div>
   );
 }
