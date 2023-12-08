@@ -1090,9 +1090,20 @@ function _Chat() {
             <IconButton
               text="4.0"
               bordered
-              title={Locale.Chat.Actions.Export}
               onClick={() => {
                 config.update((config) => (config.modelConfig.model = "gpt-4"));
+              }}
+            />
+          </div>
+
+          <div className="window-action-button">
+            <IconButton
+              text="3.0"
+              bordered
+              onClick={() => {
+                config.update(
+                  (config) => (config.modelConfig.model = "gpt-3.5-turbo"),
+                );
               }}
             />
           </div>

@@ -12,7 +12,6 @@ import LeftIcon from "@/app/icons/left.svg";
 import Locale from "@/app/locales";
 import { Path } from "@/app/constant";
 import ui from "./ui-lib.module.scss";
-import { wait } from "next/dist/build/output/log";
 
 export function Account() {
   const [UserInfo, setUserInfo] = useState({
@@ -25,9 +24,7 @@ export function Account() {
   const [isCodeSent, setIsCodeSent] = useState(false);
   const [countdown, setCountdown] = useState(60);
   const config = useAppConfig();
-  const [loginStatus, setLoginStatus] = useState(
-    !useAppConfig.getState().needLogin,
-  );
+  const [loginStatus, setLoginStatus] = useState(false);
   const [dropdownOptions, setDropdownOptions] = useState([]);
   const [OrderInfo, setOrderInfo] = useState({
     amount: 0,
@@ -37,7 +34,7 @@ export function Account() {
   const accessStore = useAccessStore();
 
   const [showImage, setShowImage] = useState(false);
-  const [urlCountDown, setUrlCountDown] = useState(60);
+  const [urlCountDown, setUrlCountDown] = useState(180);
   const navigate = useNavigate();
 
   // 验证码倒计时
@@ -79,9 +76,6 @@ export function Account() {
   useEffect(() => {
     if (notEmptyString(UserInfo.token)) {
       config.update((config) => (config.token = UserInfo.token));
-      config.update(() => {
-        config.needLogin = false;
-      });
       accessStore.update((access) => (access.token = UserInfo.token));
     }
     if (notEmptyString(UserInfo.refreshToken)) {
@@ -93,12 +87,13 @@ export function Account() {
   useEffect(() => {
     if (notEmptyString(OrderInfo.url) && notEmptyString(OrderInfo.amount)) {
       setShowImage(true);
+      getOrderList();
     }
     console.log("OrderInfo ", OrderInfo);
   }, [OrderInfo.amount]);
 
   useEffect(() => {
-    getOrderList().then((r) => {});
+    getOrderList();
   }, [loginStatus]);
 
   // 组件挂载时执行一次
@@ -182,7 +177,7 @@ export function Account() {
 
   const refreshToken = async () => {
     const res = await fetch("http://127.0.0.1:8080/v1/gpt/user/refreshToken", {
-      body: JSON.stringify(UserInfo),
+      body: JSON.stringify(config),
       headers: getHeaders(),
       method: "POST",
     });
@@ -211,8 +206,10 @@ export function Account() {
       showToast(result.message);
       return;
     }
-    // 设置订单信息
+
     setOrderInfo(result.data);
+    // 设置订单信息
+    setShowImage(true);
   };
 
   const getPayStatus = async () => {
@@ -305,7 +302,7 @@ export function Account() {
             style={{ width: "30%", height: "60%" }}
           />
           <div className={style["input"]}>
-            <button onClick={() => cancelOrder} className={ui["full"]}>
+            <button onClick={cancelOrder} className={ui["full"]}>
               取消支付
             </button>
           </div>

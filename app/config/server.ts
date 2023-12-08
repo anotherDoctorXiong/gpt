@@ -68,6 +68,7 @@ export const getServerSideConfig = () => {
   const apiKey = apiKeys[randomIndex];
   console.log(
     `[Server Config] using ${randomIndex + 1} of ${apiKeys.length} api key`,
+    process,
   );
 
   return {
@@ -79,6 +80,8 @@ export const getServerSideConfig = () => {
     azureUrl: process.env.AZURE_URL,
     azureApiKey: process.env.AZURE_API_KEY,
     azureApiVersion: process.env.AZURE_API_VERSION,
+
+    serverUrl: process.env.SERVER_URL,
 
     needCode: ACCESS_CODES.size > 0,
     code: process.env.CODE,
