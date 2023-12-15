@@ -18,6 +18,8 @@ const DEFAULT_ACCESS_STATE = {
   accessCode: "",
   useCustomConfig: false,
 
+  serverUrl: "",
+
   provider: ServiceProvider.OpenAI,
 
   // openai

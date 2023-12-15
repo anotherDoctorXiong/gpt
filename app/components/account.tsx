@@ -81,6 +81,9 @@ export function Account() {
     if (notEmptyString(UserInfo.refreshToken)) {
       config.update((config) => (config.refreshToken = UserInfo.refreshToken));
     }
+    if (notEmptyString(UserInfo.phone) && notEmptyString(UserInfo.balance)) {
+      setLoginStatus(true);
+    }
   }, [UserInfo]);
 
   // 订单状态变化

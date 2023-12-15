@@ -17,6 +17,7 @@ import { prettyObject } from "../utils/format";
 import { estimateTokenLength } from "../utils/token";
 import { nanoid } from "nanoid";
 import { createPersistStore } from "../utils/store";
+import { getServerSideConfig } from "@/app/config/server";
 
 export type ChatMessage = RequestMessage & {
   date: string;
@@ -128,6 +129,8 @@ export const useChatStore = createPersistStore(
         ...methods,
       };
     }
+
+    //const accessStore = useAccessStore();
 
     const methods = {
       clearSessions() {
@@ -265,6 +268,8 @@ export const useChatStore = createPersistStore(
       },
 
       async onUserInput(content: string) {
+        const serverConfig = getServerSideConfig();
+        console.log("[serverConfig] ", process.env.SERVER_URL);
         const session = get().currentSession();
         const modelConfig = session.mask.modelConfig;
 
@@ -298,7 +303,6 @@ export const useChatStore = createPersistStore(
             botMessage,
           ]);
         });
-
         // make request
         api.llm.chat({
           messages: sendMessages,
@@ -418,9 +422,7 @@ export const useChatStore = createPersistStore(
         // 2. pre-defined in-context prompts
         // 3. short term memory: latest n messages
         // 4. newest input message
-        const memoryStartIndex = shouldSendLongTermMemory
-          ? Math.min(longTermMemoryStartIndex, shortTermMemoryStartIndex)
-          : shortTermMemoryStartIndex;
+        const memoryStartIndex = shortTermMemoryStartIndex;
         // and if user has cleared history messages, we should exclude the memory too.
         const contextStartIndex = Math.max(clearContextIndex, memoryStartIndex);
         const maxTokenThreshold = modelConfig.max_tokens;
@@ -488,6 +490,7 @@ export const useChatStore = createPersistStore(
               content: Locale.Store.Prompt.Topic,
             }),
           );
+
           api.llm.chat({
             messages: topicMessages,
             config: {
