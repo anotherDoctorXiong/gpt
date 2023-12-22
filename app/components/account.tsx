@@ -10,7 +10,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { IconButton } from "@/app/components/button";
 import LeftIcon from "@/app/icons/left.svg";
 import Locale from "@/app/locales";
-import { Path } from "@/app/constant";
+import { Path, SERVER_URL } from "@/app/constant";
 import ui from "./ui-lib.module.scss";
 
 export function Account() {
@@ -111,7 +111,7 @@ export function Account() {
   }, []);
 
   const getOrderList = async () => {
-    const res = await fetch("http://127.0.0.1:8080/v1/gpt/order/positionList", {
+    const res = await fetch(SERVER_URL + "/gpt/order/positionList", {
       headers: getHeaders(),
       method: "GET",
     });
@@ -129,7 +129,7 @@ export function Account() {
   };
 
   const getUserInfo = async () => {
-    const res = await fetch("http://127.0.0.1:8080/v1/gpt/user/info", {
+    const res = await fetch(SERVER_URL + "/gpt/user/info", {
       headers: getHeaders(),
       method: "GET",
     });
@@ -144,7 +144,7 @@ export function Account() {
   };
 
   const sendLoginCode = async () => {
-    const res = await fetch("http://127.0.0.1:8080/v1/gpt/user/loginCode", {
+    const res = await fetch(SERVER_URL + "/gpt/user/loginCode", {
       body: JSON.stringify(UserInfo),
       headers: getHeaders(),
       method: "POST",
@@ -161,7 +161,7 @@ export function Account() {
   };
 
   const handleLogin = async () => {
-    const res = await fetch("http://127.0.0.1:8080/v1/gpt/user/login", {
+    const res = await fetch(SERVER_URL + "/gpt/user/login", {
       body: JSON.stringify(UserInfo),
       headers: getHeaders(),
       method: "POST",
@@ -179,7 +179,7 @@ export function Account() {
   };
 
   const refreshToken = async () => {
-    const res = await fetch("http://127.0.0.1:8080/v1/gpt/user/refreshToken", {
+    const res = await fetch(SERVER_URL + "/gpt/user/refreshToken", {
       body: JSON.stringify(config),
       headers: getHeaders(),
       method: "POST",
@@ -197,7 +197,7 @@ export function Account() {
   };
 
   const createOrder = async () => {
-    const res = await fetch("http://127.0.0.1:8080/v1/gpt/order/create", {
+    const res = await fetch(SERVER_URL + "/gpt/order/create", {
       body: JSON.stringify(OrderInfo),
       headers: getHeaders(),
       method: "POST",
@@ -216,7 +216,7 @@ export function Account() {
   };
 
   const getPayStatus = async () => {
-    const res = await fetch("http://127.0.0.1:8080/v1/gpt/order/pay/status", {
+    const res = await fetch(SERVER_URL + "/gpt/order/pay/status", {
       body: JSON.stringify(OrderInfo),
       headers: getHeaders(),
       method: "POST",
@@ -233,7 +233,7 @@ export function Account() {
   };
 
   const cancelOrder = async () => {
-    const res = await fetch("http://127.0.0.1:8080/v1/gpt/order/pay/cancel", {
+    const res = await fetch(SERVER_URL + "/gpt/order/pay/cancel", {
       body: JSON.stringify(OrderInfo),
       headers: getHeaders(),
       method: "POST",

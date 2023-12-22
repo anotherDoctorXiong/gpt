@@ -1088,7 +1088,7 @@ function _Chat() {
 
           <div className="window-action-button">
             <IconButton
-              text="4.0"
+              text="高级(4.0)"
               bordered
               onClick={() => {
                 config.update((config) => (config.modelConfig.model = "gpt-4"));
@@ -1098,7 +1098,7 @@ function _Chat() {
 
           <div className="window-action-button">
             <IconButton
-              text="3.0"
+              text="普通(3.5)"
               bordered
               onClick={() => {
                 config.update(

@@ -4,6 +4,7 @@ import {
   DEFAULT_MODELS,
   OpenaiPath,
   REQUEST_TIMEOUT_MS,
+  SERVER_URL,
   ServiceProvider,
 } from "@/app/constant";
 import { useAccessStore, useAppConfig, useChatStore } from "@/app/store";
@@ -34,6 +35,12 @@ export class ChatGPTApi implements LLMApi {
     const accessStore = useAccessStore.getState();
 
     const isAzure = accessStore.provider === ServiceProvider.Azure;
+
+    const serverUrl = SERVER_URL;
+
+    if (serverUrl) {
+      return serverUrl + "/chat/completions";
+    }
 
     if (isAzure && !accessStore.isValidAzure()) {
       throw Error(
@@ -122,7 +129,7 @@ export class ChatGPTApi implements LLMApi {
         function animateResponseText() {
           if (finished || controller.signal.aborted) {
             responseText += remainText;
-            console.log("[Response Animation] finished");
+            console.log("[Response Animation] finished", responseText);
             return;
           }
 
@@ -187,7 +194,6 @@ export class ChatGPTApi implements LLMApi {
               }
 
               responseText = responseTexts.join("\n\n");
-
               return finish();
             }
           },
@@ -209,7 +215,10 @@ export class ChatGPTApi implements LLMApi {
                 remainText += delta;
               }
             } catch (e) {
+              responseText = prettyObject(msg.data);
               console.error("[Request] parse error", text);
+              finished = true;
+              options.onError?.(new Error(responseText));
             }
           },
           onclose() {

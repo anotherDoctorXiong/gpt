@@ -269,7 +269,6 @@ export const useChatStore = createPersistStore(
 
       async onUserInput(content: string) {
         const serverConfig = getServerSideConfig();
-        console.log("[serverConfig] ", process.env.SERVER_URL);
         const session = get().currentSession();
         const modelConfig = session.mask.modelConfig;
 
@@ -308,6 +307,7 @@ export const useChatStore = createPersistStore(
           messages: sendMessages,
           config: { ...modelConfig, stream: true },
           onUpdate(message) {
+            console.info("onUpdate", message);
             botMessage.streaming = true;
             if (message) {
               botMessage.content = message;
@@ -317,6 +317,7 @@ export const useChatStore = createPersistStore(
             });
           },
           onFinish(message) {
+            console.info("onFinish", message);
             botMessage.streaming = false;
             if (message) {
               botMessage.content = message;
@@ -325,6 +326,7 @@ export const useChatStore = createPersistStore(
             ChatControllerPool.remove(session.id, botMessage.id);
           },
           onError(error) {
+            console.info("error", error);
             const isAborted = error.message.includes("aborted");
             botMessage.content +=
               "\n\n" +
@@ -422,7 +424,9 @@ export const useChatStore = createPersistStore(
         // 2. pre-defined in-context prompts
         // 3. short term memory: latest n messages
         // 4. newest input message
-        const memoryStartIndex = shortTermMemoryStartIndex;
+        const memoryStartIndex = shouldSendLongTermMemory
+          ? Math.min(longTermMemoryStartIndex, shortTermMemoryStartIndex)
+          : shortTermMemoryStartIndex;
         // and if user has cleared history messages, we should exclude the memory too.
         const contextStartIndex = Math.max(clearContextIndex, memoryStartIndex);
         const maxTokenThreshold = modelConfig.max_tokens;
@@ -491,7 +495,14 @@ export const useChatStore = createPersistStore(
             }),
           );
 
-          api.llm.chat({
+          get().updateCurrentSession(
+            (session) =>
+              (session.topic =
+                messages.length > 0
+                  ? trimTopic(messages[0].content)
+                  : DEFAULT_TOPIC),
+          );
+          /* api.llm.chat({
             messages: topicMessages,
             config: {
               model: getSummarizeModel(session.mask.modelConfig.model),
@@ -503,7 +514,7 @@ export const useChatStore = createPersistStore(
                     message.length > 0 ? trimTopic(message) : DEFAULT_TOPIC),
               );
             },
-          });
+          });*/
         }
 
         const modelConfig = session.mask.modelConfig;
