@@ -914,7 +914,7 @@ export function Settings() {
             </ListItem>
           )}
 
-          {!accessStore.hideUserApiKey && (
+          {/*{!accessStore.hideUserApiKey && (
             <>
               {
                 // Conditionally render the following ListItem based on clientConfig.isApp
@@ -1062,7 +1062,7 @@ export function Settings() {
                 </>
               )}
             </>
-          )}
+          )}*/}
 
           {!shouldHideBalanceQuery && !clientConfig?.isApp ? (
             <ListItem
@@ -1090,7 +1090,7 @@ export function Settings() {
             </ListItem>
           ) : null}
 
-          <ListItem
+          {/*<ListItem
             title={Locale.Settings.Access.CustomModel.Title}
             subTitle={Locale.Settings.Access.CustomModel.SubTitle}
           >
@@ -1104,10 +1104,10 @@ export function Settings() {
                 )
               }
             ></input>
-          </ListItem>
+          </ListItem>*/}
         </List>
 
-        <List>
+        {/* <List>
           <ModelConfigList
             modelConfig={config.modelConfig}
             updateConfig={(updater) => {
@@ -1116,7 +1116,7 @@ export function Settings() {
               config.update((config) => (config.modelConfig = modelConfig));
             }}
           />
-        </List>
+        </List>*/}
 
         {shouldShowPromptModal && (
           <UserPromptModal onClose={() => setShowPromptModal(false)} />

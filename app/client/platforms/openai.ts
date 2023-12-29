@@ -83,7 +83,7 @@ export class ChatGPTApi implements LLMApi {
       ...useAppConfig.getState().modelConfig,
       ...useChatStore.getState().currentSession().mask.modelConfig,
       ...{
-        model: options.config.model,
+        model: useAppConfig.getState().modelConfig.model,
       },
     };
 
@@ -98,7 +98,7 @@ export class ChatGPTApi implements LLMApi {
       // max_tokens: Math.max(modelConfig.max_tokens, 1024),
       // Please do not ask me why not send max_tokens, no reason, this param is just shit, I dont want to explain anymore.
     };
-
+    console.trace();
     console.log("[Request] openai payload: ", requestPayload);
 
     const shouldStream = !!options.config.stream;
@@ -185,16 +185,11 @@ export class ChatGPTApi implements LLMApi {
                 extraInfo = prettyObject(resJson);
               } catch {}
 
-              if (res.status === 401) {
-                responseTexts.push(Locale.Error.Unauthorized);
-              }
-
+              const errorJson = await res.clone().json();
               if (extraInfo) {
-                responseTexts.push(extraInfo);
+                responseTexts.push(errorJson.message);
               }
-
-              responseText = responseTexts.join("\n\n");
-              return finish();
+              options.onError?.(new Error(errorJson.message));
             }
           },
           onmessage(msg) {
@@ -215,10 +210,9 @@ export class ChatGPTApi implements LLMApi {
                 remainText += delta;
               }
             } catch (e) {
-              responseText = prettyObject(msg.data);
               console.error("[Request] parse error", text);
               finished = true;
-              options.onError?.(new Error(responseText));
+              options.onError?.(new Error(msg.data));
             }
           },
           onclose() {

@@ -51,7 +51,7 @@ export const getServerSideConfig = () => {
     );
   }
 
-  const disableGPT4 = !!process.env.DISABLE_GPT4;
+  const disableGPT4 = true;
   let customModels = process.env.CUSTOM_MODELS ?? "";
 
   if (disableGPT4) {
