@@ -1,6 +1,7 @@
 import {
   ApiPath,
   DEFAULT_API_HOST,
+  SERVER_URL,
   ServiceProvider,
   StoreKey,
 } from "../constant";
@@ -8,6 +9,8 @@ import { getHeaders } from "../client/api";
 import { getClientConfig } from "../config/client";
 import { createPersistStore } from "../utils/store";
 import { ensure } from "../utils/clone";
+import { showToast } from "@/app/components/ui-lib";
+import { useAppConfig } from "@/app/store/config";
 
 let fetchState = 0; // 0 not fetch, 1 fetching, 2 done
 
@@ -70,6 +73,7 @@ export const useAccessStore = createPersistStore(
         (this.enabledAccessControl() && ensure(get(), ["accessCode"]))
       );
     },
+
     fetch() {
       if (fetchState > 0 || getClientConfig()?.buildMode === "export") return;
       fetchState = 1;

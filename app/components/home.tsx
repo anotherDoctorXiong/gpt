@@ -1,5 +1,7 @@
 "use client";
 
+import { showToast } from "@/app/components/ui-lib";
+
 require("../polyfill");
 
 import { useState, useEffect } from "react";
@@ -12,10 +14,11 @@ import LoadingIcon from "../icons/three-dots.svg";
 import { getCSSVar, useMobileScreen } from "../utils";
 
 import dynamic from "next/dynamic";
-import { Path, SlotID } from "../constant";
+import { Path, SERVER_URL, SlotID } from "../constant";
 import { ErrorBoundary } from "./error";
 
 import { getISOLang, getLang } from "../locales";
+import { useAppConfig } from "../store";
 
 import {
   HashRouter as Router,
@@ -24,11 +27,11 @@ import {
   useLocation,
 } from "react-router-dom";
 import { SideBar } from "./sidebar";
-import { useAppConfig } from "../store/config";
 import { AuthPage } from "./auth";
 import { getClientConfig } from "../config/client";
-import { api } from "../client/api";
+import { api, getHeaders } from "../client/api";
 import { useAccessStore } from "../store";
+import { notEmptyString } from "@/app/utils/format";
 
 export function Loading(props: { noLogo?: boolean }) {
   return (
@@ -61,6 +64,34 @@ const MaskPage = dynamic(async () => (await import("./mask")).MaskPage, {
 
 export function useSwitchTheme() {
   const config = useAppConfig();
+  const accessStore = useAccessStore();
+
+  useEffect(() => {
+    const refreshToken = async () => {
+      const res = await fetch(SERVER_URL + "/gpt/user/refreshToken", {
+        body: JSON.stringify(config),
+        headers: getHeaders(),
+        method: "POST",
+      });
+
+      // 解析返回的 JSON 数据
+      const result: any = await res.json();
+      if (result.code !== 200) {
+        showToast(result.message);
+      } else {
+        if (notEmptyString(result.data.token)) {
+          config.update((config) => (config.token = result.data.token));
+          accessStore.update((access) => (access.token = result.data.token));
+        }
+        if (notEmptyString(result.data.refreshToken)) {
+          config.update(
+            (config) => (config.refreshToken = result.data.refreshToken),
+          );
+        }
+      }
+    };
+    refreshToken();
+  }, []);
 
   useEffect(() => {
     document.body.classList.remove("light");

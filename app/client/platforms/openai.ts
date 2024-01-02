@@ -39,7 +39,7 @@ export class ChatGPTApi implements LLMApi {
     const serverUrl = SERVER_URL;
 
     if (serverUrl) {
-      return serverUrl + "/chat/completions";
+      return serverUrl + "/gpt/chat/completions";
     }
 
     if (isAzure && !accessStore.isValidAzure()) {

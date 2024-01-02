@@ -60,7 +60,6 @@ export const DEFAULT_CONFIG = {
   },
   token: "",
   refreshToken: "",
-  needLogin: true,
 };
 
 export type ChatConfig = typeof DEFAULT_CONFIG;

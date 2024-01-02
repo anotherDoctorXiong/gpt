@@ -74,13 +74,6 @@ export function Account() {
   }, [showImage, urlCountDown]);
 
   useEffect(() => {
-    if (notEmptyString(UserInfo.token)) {
-      config.update((config) => (config.token = UserInfo.token));
-      accessStore.update((access) => (access.token = UserInfo.token));
-    }
-    if (notEmptyString(UserInfo.refreshToken)) {
-      config.update((config) => (config.refreshToken = UserInfo.refreshToken));
-    }
     if (notEmptyString(UserInfo.phone) && notEmptyString(UserInfo.balance)) {
       setLoginStatus(true);
     }
@@ -92,7 +85,6 @@ export function Account() {
       setShowImage(true);
       getOrderList();
     }
-    console.log("OrderInfo ", OrderInfo);
   }, [OrderInfo.amount]);
 
   useEffect(() => {
@@ -102,13 +94,8 @@ export function Account() {
   // 组件挂载时执行一次
   useEffect(() => {
     // 通过token获取用户信息并校验token是否有效
-    getUserInfo().then((success) => {
-      if (!success) {
-        // 失败则尝试通过refreshToken重新获取token
-        refreshToken().then((r) => {});
-      }
-    });
-  }, []);
+    getUserInfo().then((success) => {});
+  }, [config.token]);
 
   const getOrderList = async () => {
     const res = await fetch(SERVER_URL + "/gpt/order/positionList", {
@@ -178,7 +165,7 @@ export function Account() {
     setLoginStatus(true);
   };
 
-  const refreshToken = async () => {
+  /*const refreshToken = async () => {
     const res = await fetch(SERVER_URL + "/gpt/user/refreshToken", {
       body: JSON.stringify(config),
       headers: getHeaders(),
@@ -194,7 +181,7 @@ export function Account() {
     // 模拟发送成功后的操作
     setUserInfo(result.data);
     return true;
-  };
+  };*/
 
   const createOrder = async () => {
     const res = await fetch(SERVER_URL + "/gpt/order/create", {
