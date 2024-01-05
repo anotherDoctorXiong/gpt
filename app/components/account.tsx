@@ -77,6 +77,13 @@ export function Account() {
     if (notEmptyString(UserInfo.phone) && notEmptyString(UserInfo.balance)) {
       setLoginStatus(true);
     }
+    if (notEmptyString(UserInfo.token)) {
+      config.update((config) => (config.token = UserInfo.token));
+      accessStore.update((access) => (access.token = UserInfo.token));
+    }
+    if (notEmptyString(UserInfo.refreshToken)) {
+      config.update((config) => (config.refreshToken = UserInfo.refreshToken));
+    }
   }, [UserInfo]);
 
   // 订单状态变化
