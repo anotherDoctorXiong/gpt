@@ -46,6 +46,7 @@ import {
   useAppConfig,
   DEFAULT_TOPIC,
   ModelType,
+  ModalConfigValidator,
 } from "../store";
 
 import {
@@ -68,6 +69,7 @@ import {
   List,
   ListItem,
   Modal,
+  Select,
   Selector,
   showConfirm,
   showPrompt,
@@ -89,6 +91,7 @@ import { prettyObject } from "../utils/format";
 import { ExportMessageModal } from "./exporter";
 import { getClientConfig } from "../config/client";
 import { useAllModels } from "../utils/hooks";
+import { ModelConfigList } from "@/app/components/model-config";
 
 const Markdown = dynamic(async () => (await import("./markdown")).Markdown, {
   loading: () => <LoadingIcon />,
@@ -980,6 +983,12 @@ function _Chat() {
 
   const autoFocus = !isMobileScreen; // wont auto focus on mobile screen
   const showMaxIcon = !isMobileScreen && !clientConfig?.isApp;
+  const allModels = [
+    { name: "gpt-3.5-turbo", displayName: "gpt-3.5", available: true },
+    { name: "gpt-4", displayName: "gpt-4", available: true },
+
+    // 可以添加更多的模型对象
+  ];
 
   useCommand({
     fill: setUserInput,
@@ -1085,8 +1094,29 @@ function _Chat() {
               />
             </div>
           )}
-
           <div className="window-action-button">
+            <Select
+              value={config.modelConfig.model}
+              onChange={(e) => {
+                config.update(
+                  (config) =>
+                    (config.modelConfig.model = ModalConfigValidator.model(
+                      e.currentTarget.value,
+                    )),
+                );
+              }}
+            >
+              {allModels
+                .filter((v) => v.available)
+                .map((v, i) => (
+                  <option value={v.name} key={i}>
+                    {v.displayName}
+                  </option>
+                ))}
+            </Select>
+          </div>
+
+          {/*<div className="window-action-button">
             <IconButton
               text="高级(4.0)"
               bordered
@@ -1095,6 +1125,8 @@ function _Chat() {
               }}
             />
           </div>
+
+
 
           <div className="window-action-button">
             <IconButton
@@ -1106,7 +1138,7 @@ function _Chat() {
                 );
               }}
             />
-          </div>
+          </div>*/}
           <div className="window-action-button">
             <IconButton
               icon={<ExportIcon />}

@@ -11,7 +11,7 @@ export const RUNTIME_CONFIG_DOM = "danger-runtime-config";
 export const DEFAULT_CORS_HOST = "https://a.nextweb.fun";
 export const DEFAULT_API_HOST = `${DEFAULT_CORS_HOST}/api/proxy`;
 export const OPENAI_BASE_URL = "https://api.openai.com";
-export const SERVER_URL = "https://api.doctorxiong.club/v1";
+export const SERVER_URL = "http://127.0.0.1:8080/v1";
 // https://api.doctorxiong.club/v1  http://127.0.0.1:8080/v1
 export enum Path {
   Home = "/",
@@ -103,7 +103,7 @@ export const DEFAULT_MODELS = [
     name: "gpt-4",
     available: true,
   },
-  {
+  /*{
     name: "gpt-4-0314",
     available: true,
   },
@@ -130,9 +130,13 @@ export const DEFAULT_MODELS = [
   {
     name: "gpt-4-vision-preview",
     available: true,
-  },
+  },*/
   {
     name: "gpt-3.5-turbo",
+    available: true,
+  },
+  {
+    name: "gpt-3.5",
     available: true,
   },
   {

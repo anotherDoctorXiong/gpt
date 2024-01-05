@@ -38,7 +38,7 @@ const DEFAULT_ACCESS_STATE = {
   needCode: true,
   hideUserApiKey: false,
   hideBalanceQuery: false,
-  disableGPT4: false,
+  disableGPT4: true,
   disableFastLink: false,
   customModels: "",
   token: "",
