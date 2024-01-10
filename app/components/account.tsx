@@ -310,8 +310,9 @@ export function Account() {
             <strong>手机号:</strong> {UserInfo.phone}
           </div>
           <div className={style["input"]}>
-            <strong>余额:</strong> ${UserInfo.balance}
+            <strong>点数:</strong> {UserInfo.balance}
           </div>
+
           <div className={style["input"]}>
             <strong>选择充值档位:</strong>
             <select
@@ -332,9 +333,15 @@ export function Account() {
           </div>
 
           <div className={style["input"]}>
-            <button onClick={createOrder}>充值</button>
-            {urlCountDown}
+            <button onClick={createOrder} className={ui["full"]}>
+              充值
+            </button>
           </div>
+
+          <div className={style["input"]}>
+            <text> 服务异常请加QQ群联系管理员: 915345078</text>
+          </div>
+          <div className={style["input"]}></div>
 
           <div className={style["input"]}>
             <button
