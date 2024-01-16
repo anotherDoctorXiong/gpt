@@ -1089,7 +1089,7 @@ export function Settings() {
             </ListItem>
           ) : null}
 
-          {
+          {/*{
             <ListItem
               title={Locale.Settings.Access.CustomModel.Title}
               subTitle={Locale.Settings.Access.CustomModel.SubTitle}
@@ -1105,7 +1105,27 @@ export function Settings() {
                 }
               ></input>
             </ListItem>
-          }
+          }*/}
+
+          <ListItem
+            title={Locale.Settings.HistoryCount.Title}
+            subTitle={Locale.Settings.HistoryCount.SubTitle}
+          >
+            <InputRange
+              title={config.modelConfig.historyMessageCount.toString()}
+              value={config.modelConfig.historyMessageCount}
+              min="0"
+              max="64"
+              step="1"
+              onChange={(e) =>
+                config.update(
+                  (config) =>
+                    (config.modelConfig.historyMessageCount =
+                      e.target.valueAsNumber),
+                )
+              }
+            ></InputRange>
+          </ListItem>
         </List>
 
         {/*{ <List>

@@ -621,7 +621,6 @@ export const useChatStore = createPersistStore(
           newSession.topic = oldSession.topic;
           newSession.messages = [...oldSession.messages];
           newSession.mask.modelConfig.sendMemory = true;
-          newSession.mask.modelConfig.historyMessageCount = 4;
           newSession.mask.modelConfig.compressMessageLengthThreshold = 1000;
           newState.sessions.push(newSession);
         }
