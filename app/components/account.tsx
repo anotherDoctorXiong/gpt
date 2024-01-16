@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { showConfirm, showToast } from "./ui-lib";
 import { useAccessStore, useAppConfig } from "../store";
 import { notEmptyString } from "@/app/utils/format";
@@ -14,12 +14,17 @@ import { Path, SERVER_URL } from "@/app/constant";
 import ui from "./ui-lib.module.scss";
 
 export function Account() {
+  const location = useLocation();
+  const urlParams = new URLSearchParams(location.search);
+  const param = urlParams.get("inviteCode");
+  const inviteCode = param ? param : "";
   const [UserInfo, setUserInfo] = useState({
     phone: "",
     balance: 0,
     captcha: "",
     token: "",
     refreshToken: "",
+    inviteCode: inviteCode,
   });
   const [isCodeSent, setIsCodeSent] = useState(false);
   const [countdown, setCountdown] = useState(60);
@@ -32,7 +37,6 @@ export function Account() {
     url: "",
   });
   const accessStore = useAccessStore();
-
   const [showImage, setShowImage] = useState(false);
   const [urlCountDown, setUrlCountDown] = useState(180);
   const navigate = useNavigate();
@@ -285,6 +289,27 @@ export function Account() {
               <button>验证码已发送 ({countdown}s)</button>
             )}
           </div>
+
+          <div className={style["input"]}>
+            <input
+              type="text"
+              value={UserInfo.inviteCode}
+              onChange={(e) => {
+                setUserInfo({ ...UserInfo, inviteCode: e.target.value });
+              }}
+              className={ui["full"]}
+              placeholder="请输入邀请码"
+            />
+            <div
+              style={{
+                paddingLeft: "20px",
+                overflow: "auto",
+                fontSize: "small",
+              }}
+            >
+              可额外获得对话点数
+            </div>
+          </div>
           <div className={style["input"]}>
             <button onClick={handleLogin} className={ui["full"]}>
               登录
@@ -307,14 +332,14 @@ export function Account() {
       ) : (
         <div className={style["account"]}>
           <div className={style["input"]}>
-            <strong>手机号:</strong> {UserInfo.phone}
+            <strong>手机号</strong> {UserInfo.phone}
           </div>
           <div className={style["input"]}>
-            <strong>点数:</strong> {UserInfo.balance}
+            <strong>对话点数</strong> {UserInfo.balance}
           </div>
 
           <div className={style["input"]}>
-            <strong>选择充值档位:</strong>
+            <strong>选择充值档位</strong>
             <select
               value={OrderInfo.amount}
               onChange={(event) => {
@@ -339,7 +364,28 @@ export function Account() {
           </div>
 
           <div className={style["input"]}>
-            <text> 服务异常请加QQ群联系管理员: 915345078</text>
+            <strong>你的邀请码</strong>
+            {UserInfo.inviteCode}
+            <button
+              onClick={() => {
+                navigator.clipboard
+                  .writeText(
+                    window.location.host +
+                      "/#/account?inviteCode=" +
+                      UserInfo.inviteCode,
+                  )
+                  .then((r) => {});
+              }}
+            >
+              复制分享链接
+            </button>
+          </div>
+          <div className={style["input"]}>
+            成功邀请注册可获得600对话点数,充值再额外获的点数
+          </div>
+
+          <div className={style["input"]}>
+            服务异常请加QQ群联系管理员: 915345078
           </div>
           <div className={style["input"]}></div>
 
