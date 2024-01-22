@@ -18,6 +18,7 @@ import { estimateTokenLength } from "../utils/token";
 import { nanoid } from "nanoid";
 import { createPersistStore } from "../utils/store";
 import { getServerSideConfig } from "@/app/config/server";
+import { useState } from "react";
 
 export type ChatMessage = RequestMessage & {
   date: string;
@@ -307,7 +308,6 @@ export const useChatStore = createPersistStore(
           messages: sendMessages,
           config: { ...modelConfig, stream: true },
           onUpdate(message) {
-            console.info("onUpdate", message);
             botMessage.streaming = true;
             if (message) {
               botMessage.content = message;
@@ -317,7 +317,6 @@ export const useChatStore = createPersistStore(
             });
           },
           onFinish(message) {
-            console.info("onFinish", message);
             botMessage.streaming = false;
             if (message) {
               botMessage.content = message;
@@ -326,7 +325,6 @@ export const useChatStore = createPersistStore(
             ChatControllerPool.remove(session.id, botMessage.id);
           },
           onError(error) {
-            console.info("error", error);
             const isAborted = error.message.includes("aborted");
             botMessage.content +=
               "\n\n" +

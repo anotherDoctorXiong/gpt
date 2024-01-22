@@ -18,6 +18,7 @@ import {
 import { prettyObject } from "@/app/utils/format";
 import { getClientConfig } from "@/app/config/client";
 import { makeAzurePath } from "@/app/azure";
+import { showToast } from "@/app/components/ui-lib";
 
 export interface OpenAIListModelResponse {
   object: string;
@@ -99,6 +100,9 @@ export class ChatGPTApi implements LLMApi {
       // Please do not ask me why not send max_tokens, no reason, this param is just shit, I dont want to explain anymore.
     };
     console.log("[Request] openai payload: ", requestPayload);
+    const requestSlowTimer = setTimeout(() => {
+      showToast("检测到当前节点响应速度过慢,若使用VPN请关闭");
+    }, 8000);
 
     const shouldStream = !!options.config.stream;
     const controller = new AbortController();
@@ -192,6 +196,8 @@ export class ChatGPTApi implements LLMApi {
             }
           },
           onmessage(msg) {
+            // 取消定时器
+            clearTimeout(requestSlowTimer);
             if (msg.data === "[DONE]" || finished) {
               return finish();
             }
