@@ -33,6 +33,8 @@ declare global {
 
 const ACCESS_CODES = (function getAccessCodes(): Set<string> {
   const code = process.env.CODE;
+  const URL = process.env.SERVER_URL;
+  console.log("process.env", process.env);
 
   try {
     const codes = (code?.split(",") ?? [])
