@@ -12,7 +12,7 @@ export const DEFAULT_CORS_HOST = "https://a.nextweb.fun";
 export const DEFAULT_API_HOST = `${DEFAULT_CORS_HOST}/api/proxy`;
 export const OPENAI_BASE_URL = "https://api.openai.com";
 export const SERVER_URL = "https://api.autostock.cn/v1";
-// https://api.doctorxiong.club/v1  http://127.0.0.1:8080/v1  http://152.32.216.49:8080/v1"
+// https://api.doctorxiong.club/v1  http://127.0.0.1:8080/v1  https://api.autostock.cn/v1"
 export enum Path {
   Home = "/",
   Chat = "/chat",

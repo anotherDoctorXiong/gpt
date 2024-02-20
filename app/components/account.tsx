@@ -92,7 +92,11 @@ export function Account() {
 
   // 订单状态变化
   useEffect(() => {
-    if (notEmptyString(OrderInfo.url) && notEmptyString(OrderInfo.amount)) {
+    if (
+      notEmptyString(OrderInfo.url) &&
+      notEmptyString(OrderInfo.amount) &&
+      notEmptyString(UserInfo.token)
+    ) {
       setShowImage(true);
       getOrderList();
     }
